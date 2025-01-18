@@ -11,7 +11,7 @@ R1 = 1e5 * 5000
 gamma_bps = 30
 gamma = gamma_bps / 10000
 g = 2
-sigma = 20
+sigma = 5
 mu = 0
 phi = 0.0
 
