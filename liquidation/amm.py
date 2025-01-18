@@ -9,10 +9,11 @@ class AMM:
     def __init__(self, x, y, gamma):
         self.x_reserves = x
         self.y_reserves = y
-        self.gamma = gamma
+        self.gamma = gamma/10000
 
     def trade(self, x_in, y_in):
         # Trades that are tendering to the AMM (at least one of these is zero)
+        initial_price = self.instantaneous_x_price()
         x_in = np.array(x_in)
         y_in = np.array(y_in)
 
@@ -39,7 +40,34 @@ class AMM:
             self.y_reserves = (new_y_reserves - self.y_reserves)*(self.gamma) + new_y_reserves
             output_x = 0
 
-        return TradeResult(output_x, output_y)
+        average_price = (self.instantaneous_x_price() + initial_price)/2
+
+
+        return (TradeResult(output_x, output_y), average_price) 
+    
+    def arb(self, z):
+        # z is the mispricing level
+        # return the arbitrage opportunity
+        K = self.x_reserves * self.y_reserves
+        starting_x_price = self.instantaneous_x_price()
+        exchange_price = starting_x_price * np.exp(z)
+
+        # arbitraging the pool based on the constant exchange price
+        # if z > gamma, then we can arbitrage by buying x and selling y
+        if z > self.gamma:
+            final_pool_price = exchange_price * np.exp(-self.gamma)
+            x_final = np.sqrt(K/final_pool_price)
+            y_final = K/x_final
+            self.x_reserves = x_final
+            self.y_reserves = y_final
+        # if z < -gamma, then we can arbitrage by selling x and buying y
+        elif z < -self.gamma:
+            final_pool_price = exchange_price * np.exp(self.gamma)
+            x_final = np.sqrt(K/final_pool_price)
+            y_final = K/x_final
+            self.x_reserves = x_final
+            self.y_reserves = y_final
+
 
     def infinitesimal_trade(self, x_in, y_in):
         # always convert for convenience
@@ -81,6 +109,8 @@ class AMM:
     def instantaneous_y_price(self):
         return float(self.x_reserves / self.y_reserves)
 
+    def instantaneous_x_price(self):
+        return float(self.y_reserves / self.x_reserves)
 
 if __name__ == "__main__":
     pass
