@@ -12,7 +12,7 @@ class AMM:
         self.gamma = gamma
 
     def trade(self, x_in, y_in):
-        # always convert for convenience
+        # Trades that are tendering to the AMM (at least one of these is zero)
         x_in = np.array(x_in)
         y_in = np.array(y_in)
 
@@ -22,25 +22,24 @@ class AMM:
         # so this is to make sure we're not simulating the wrong thing anywhere
         assert np.sum(x_in) == 0 or np.sum(y_in) == 0
 
-        total_x = self.x_reserves + x_in.sum() * (1-self.gamma)
-        total_y = self.y_reserves + y_in.sum() * (1-self.gamma)
+        K = self.x_reserves * self.y_reserves
 
+        if np.sum(x_in) == 0:
+            new_y_reserves = self.y_reserves + y_in.sum()
+            new_x_reserves = K / new_y_reserves 
+            output_x = (new_x_reserves - self.x_reserves)*(1-self.gamma)
+            self.x_reserves = (new_x_reserves - self.x_reserves)*(self.gamma) + new_x_reserves
+            self.y_reserves = new_y_reserves
+            output_y = 0
+        if np.sum(y_in) == 0:
+            new_x_reserves = self.x_reserves + x_in.sum()
+            new_y_reserves = K / new_x_reserves
+            output_y = (new_y_reserves - self.y_reserves)*(1-self.gamma)
+            self.x_reserves = new_x_reserves
+            self.y_reserves = (new_y_reserves - self.y_reserves)*(self.gamma) + new_y_reserves
+            output_x = 0
 
-        # Trading all of x for all of y and divvying up shares accordingly
-        self_x_share = self.x_reserves / total_x
-        self_y_share = self.y_reserves / total_y
-
-        x_in_shares = x_in / total_x
-        y_in_shares = y_in / total_y
-
-        # Update
-        self.x_reserves = self_y_share * total_x
-        self.y_reserves = self_x_share * total_y
-
-        x_out = y_in_shares * total_x
-        y_out = x_in_shares * total_y
-
-        return TradeResult(x_out, y_out)
+        return TradeResult(output_x, output_y)
 
     def infinitesimal_trade(self, x_in, y_in):
         # always convert for convenience
