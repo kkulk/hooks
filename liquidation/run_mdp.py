@@ -4,14 +4,14 @@ import matplotlib.pyplot as plt
 from mdptoolbox.mdp import ValueIteration
 import numpy as np
 
-T = 1000
-Delta_bar = 100
+T = 10
+Delta_bar = 1000
 R0 = 1e5
 R1 = 1e5 * 5000
 gamma_bps = 30
 gamma = gamma_bps / 10000
 g = 2
-sigma = 5
+sigma = 10
 mu = 0
 phi = 0.0
 

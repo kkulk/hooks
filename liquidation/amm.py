@@ -24,88 +24,78 @@ class AMM:
         assert np.sum(x_in) == 0 or np.sum(y_in) == 0
 
         K = self.x_reserves * self.y_reserves
-        # print(f"\nInitial state:")
-        # print(f"K = {K}")
-        # print(f"x_reserves = {self.x_reserves}")
-        # print(f"y_reserves = {self.y_reserves}")
+        # print(f"\nTrade - Initial K: {K}")
+        # print(f"Initial reserves: x={self.x_reserves}, y={self.y_reserves}")
 
         if np.sum(x_in) == 0:
-            # print(f"\nTrading y_in = {y_in.sum()}")
+            # print(f"Trading y_in: {y_in.sum()}")
             new_y_reserves = self.y_reserves + y_in.sum() *(1-self.gamma)
             new_x_reserves = K / new_y_reserves 
-            # print(f"new_x_reserves = {new_x_reserves}")
-            # print(f"new_y_reserves = {new_y_reserves}")
+            # print(f"After fee new reserves would be: x={new_x_reserves}, y={new_y_reserves}")
+            # print(f"New K would be: {new_x_reserves * new_y_reserves}")
             
             delta_x = new_x_reserves - self.x_reserves
-            # print(f"delta_x = {delta_x}")
-            
             output_x = delta_x 
-            # print(f"output_x (after fee) = {output_x}")
             
-            # Pool keeps the fee portion of delta_x
             self.x_reserves = new_x_reserves
             self.y_reserves = new_y_reserves
             output_y = 0
-            
-            # print(f"\nFinal state:")
-            # print(f"final x_reserves = {self.x_reserves}")
-            # print(f"final y_reserves = {self.y_reserves}")
-            # print(f"final K = {self.x_reserves * self.y_reserves}")
-            # print(f"K diff = {abs(self.x_reserves * self.y_reserves - K)}")
 
         if np.sum(y_in) == 0:
-            # print(f"\nTrading x_in = {x_in.sum()}")
+            # print(f"Trading x_in: {x_in.sum()}")
             new_x_reserves = self.x_reserves + x_in.sum() *(1-self.gamma)
             new_y_reserves = K / new_x_reserves
-            # print(f"new_x_reserves = {new_x_reserves}")
-            # print(f"new_y_reserves = {new_y_reserves}")
+            # print(f"After fee new reserves would be: x={new_x_reserves}, y={new_y_reserves}")
+            # print(f"New K would be: {new_x_reserves * new_y_reserves}")
             
-            delta_y =self.y_reserves - new_y_reserves 
-            # print(f"delta_y = {delta_y}")
-            
+            delta_y = self.y_reserves - new_y_reserves 
             output_y = delta_y 
-            # print(f"output_y (after fee) = {output_y}")
             
-            # Pool keeps the fee portion of delta_y
             self.x_reserves = new_x_reserves
             self.y_reserves = new_y_reserves
             output_x = 0
-            
-            # print(f"\nFinal state:")
-            # print(f"final x_reserves = {self.x_reserves}")
-            # print(f"final y_reserves = {self.y_reserves}")
-            # print(f"final K = {self.x_reserves * self.y_reserves}")
-            # print(f"K diff = {abs(self.x_reserves * self.y_reserves - K)}")
 
+        # final_K = self.x_reserves * self.y_reserves
+        # print(f"Final K: {final_K}")
+        # print(f"K difference: {abs(final_K - K)}")
         assert abs(self.x_reserves*self.y_reserves - K) < 1e-6
 
         average_price = (self.instantaneous_x_price() + initial_price)/2
+        return (TradeResult(output_x, output_y), average_price)
 
-        return (TradeResult(output_x, output_y), average_price) 
-    
     def arb(self, z):
-        # z is the mispricing level
-        # return the arbitrage opportunity
         K = self.x_reserves * self.y_reserves
+        # print(f"\nArb - Initial K: {K}")
+        # print(f"Initial reserves: x={self.x_reserves}, y={self.y_reserves}")
+        # print(f"Mispricing z: {z}, gamma: {self.gamma}")
+        
         starting_x_price = self.instantaneous_x_price()
         exchange_price = starting_x_price * np.exp(z)
+        # print(f"Starting price: {starting_x_price}, Exchange price: {exchange_price}")
 
-        # arbitraging the pool based on the constant exchange price
-        # if z > gamma, then we can arbitrage by buying x and selling y
         if z > self.gamma:
             final_pool_price = exchange_price * np.exp(-self.gamma)
             x_final = np.sqrt(K/final_pool_price)
             y_final = K/x_final
+            # print(f"Positive arb - New reserves would be: x={x_final}, y={y_final}")
+            # print(f"New K would be: {x_final * y_final}")
             self.x_reserves = x_final
             self.y_reserves = y_final
-        # if z < -gamma, then we can arbitrage by selling x and buying y
         elif z < -self.gamma:
             final_pool_price = exchange_price * np.exp(self.gamma)
             x_final = np.sqrt(K/final_pool_price)
             y_final = K/x_final
+            # print(f"Negative arb - New reserves would be: x={x_final}, y={y_final}")
+            # print(f"New K would be: {x_final * y_final}")
             self.x_reserves = x_final
             self.y_reserves = y_final
+        else:
+            pass
+            # print("No arb - within fee bounds")
 
+        # final_K = self.x_reserves * self.y_reserves
+        # print(f"Final K: {final_K}")
+        # print(f"K difference: {abs(final_K - K)}")
 
     def infinitesimal_trade(self, x_in, y_in):
         # always convert for convenience

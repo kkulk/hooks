@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 
 class MDP:
-    def __init__(self, amm, T, D, mu, sigma, phi, g, INV_SPACE=75, SWAP_SPACE=50, dt=12):
+    def __init__(self, amm, T, D, mu, sigma, phi, g, INV_SPACE=75, SWAP_SPACE=50, dt=1):
         self.amm = amm
         self.T = T
         self.D = D
@@ -29,10 +29,11 @@ class MDP:
         # Delta is the swap size
         Delta = min(Delta, I)
         I_next = I - Delta
-        print(Delta)
+        #print(Delta)
         z = np.log(self.external_price/self.amm.instantaneous_x_price())
         #external_price = self.amm.instantaneous_x_price() *np.exp(z)
-        print(self.external_price   )
+        print("External price:")
+        print(self.external_price)
 
         z_clipped = np.clip(z, -self.amm.gamma, self.amm.gamma)
           #arbitrage the pool
@@ -41,8 +42,10 @@ class MDP:
         trade_result, average_price = self.amm.trade(Delta, 0)
         post_trade_price = self.amm.instantaneous_x_price()
         z_intermediate = np.log(self.external_price/post_trade_price)
-        #print(post_trade_price)
+        print("Post trade price:")
+        print(post_trade_price)
         reward = trade_result.x_out *(average_price - self.external_price* (1-self.amm.gamma)) - self.phi * I - self.g*(Delta>0)
+        print(Delta)
         #z_next = z_intermediate + self.mu*self.dt + self.sigma/10000*np.random.normal()*np.sqrt(self.dt)
         last_price = self.external_price
         self.external_price = last_price + last_price*self.mu*self.dt + last_price*self.sigma/10000*np.random.normal()*np.sqrt(self.dt)
