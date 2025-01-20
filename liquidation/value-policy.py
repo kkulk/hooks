@@ -1,4 +1,4 @@
-from optimal_liquidation import AMM_MDP
+from amm_mdp import AMM_MDP
 import numpy as np
 import matplotlib.pyplot as plt
 from mdptoolbox.mdp import ValueIteration
@@ -6,16 +6,16 @@ from latexify import latexify
 
 # MDP params
 T = 1000
-Delta_bar = 100
-R0 = 1e5
-R1 = 1e5 * 5000
+Delta_bar = 1000
+R0 = 1e4
+R1 = 1e4 * 5000
 gamma = 30
 g = 2
-sigma = 20
+sigma = 8
 mu = 0
-phi = 0.0
+xi = 3
 
-mdp = AMM_MDP(T, Delta_bar, R0, R1, gamma, sigma, mu, phi, g)
+mdp = AMM_MDP(T, Delta_bar, R0, R1, gamma, sigma, mu, xi, g, INV_SPACE=40, Z_SPACE=40, SWAP_SPACE=40)
 
 #  transition + reward matrices
 P, R = mdp.build_mdp_matrices()
@@ -56,12 +56,11 @@ plt.figure()
 plt.imshow(value_function, origin='lower', aspect='auto',
            extent=[min(mdp.z_space), max(mdp.z_space), min(mdp.Delta_space), max(mdp.Delta_space)],
            cmap='plasma')
-cb = plt.colorbar(label='Optimal Action')
-plt.xlabel('Bps mispricing ($z$)', fontsize=16)
-plt.ylabel('Inventory ($\Delta$)', fontsize=16)
-plt.title('Value Function Heatmap', fontsize=18)
+cb = plt.colorbar(label='Optimal value')
+plt.xlabel('Bps mispricing, $z$', fontsize=16)
+plt.ylabel('Inventory, $I$', fontsize=16)
+plt.title('Value function', fontsize=18)
 plt.grid(True)
-plt.legend(fontsize=14)
 plt.savefig('../figures/value-function.png', bbox_inches='tight', dpi=500)
 
 
@@ -71,10 +70,9 @@ plt.figure()
 plt.imshow(optimal_policy, origin='lower', aspect='auto',
            extent=[min(mdp.z_space), max(mdp.z_space), min(mdp.Delta_space), max(mdp.Delta_space)],
            cmap='plasma')
-cb = plt.colorbar(label='Optimal Action')
-plt.xlabel('bps mispricing ($z$)', fontsize=16)
-plt.ylabel('Inventory ($\Delta$)', fontsize=16)
+cb = plt.colorbar(label='Optimal trade')
+plt.xlabel('Bps mispricing, $z$', fontsize=16)
+plt.ylabel('Inventory, $I$', fontsize=16)
 plt.title('Optimal policy', fontsize=18)
 plt.grid(True)
-plt.legend(fontsize=14)
 plt.savefig('../figures/optimal-policy.png', bbox_inches='tight', dpi=500)

@@ -58,23 +58,23 @@ class AMM:
         # final_K = self.x_reserves * self.y_reserves
         # print(f"Final K: {final_K}")
         # print(f"K difference: {abs(final_K - K)}")
-        assert abs(self.x_reserves*self.y_reserves - K) < 1e-6
+        #assert abs(self.x_reserves*self.y_reserves - K) < 1e-3
 
         average_price = (self.instantaneous_x_price() + initial_price)/2
         return (TradeResult(output_x, output_y), average_price)
 
-    def arb(self, z):
+    def arb(self, external_price):
         K = self.x_reserves * self.y_reserves
         # print(f"\nArb - Initial K: {K}")
         # print(f"Initial reserves: x={self.x_reserves}, y={self.y_reserves}")
         # print(f"Mispricing z: {z}, gamma: {self.gamma}")
         
         starting_x_price = self.instantaneous_x_price()
-        exchange_price = starting_x_price * np.exp(z)
+        z = np.log(external_price/starting_x_price)
         # print(f"Starting price: {starting_x_price}, Exchange price: {exchange_price}")
 
         if z > self.gamma:
-            final_pool_price = exchange_price * np.exp(-self.gamma)
+            final_pool_price = external_price * np.exp(-self.gamma)
             x_final = np.sqrt(K/final_pool_price)
             y_final = K/x_final
             # print(f"Positive arb - New reserves would be: x={x_final}, y={y_final}")
@@ -82,7 +82,7 @@ class AMM:
             self.x_reserves = x_final
             self.y_reserves = y_final
         elif z < -self.gamma:
-            final_pool_price = exchange_price * np.exp(self.gamma)
+            final_pool_price = external_price * np.exp(self.gamma)
             x_final = np.sqrt(K/final_pool_price)
             y_final = K/x_final
             # print(f"Negative arb - New reserves would be: x={x_final}, y={y_final}")

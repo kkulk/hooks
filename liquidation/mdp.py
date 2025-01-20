@@ -35,9 +35,9 @@ class MDP:
         print("External price:")
         print(self.external_price)
 
-        z_clipped = np.clip(z, -self.amm.gamma, self.amm.gamma)
+        #z_clipped = np.clip(z, -self.amm.gamma, self.amm.gamma)
           #arbitrage the pool
-        self.amm.arb(z_clipped)
+        self.amm.arb(self.external_price)
         post_arb_price = self.amm.instantaneous_x_price()
         trade_result, average_price = self.amm.trade(Delta, 0)
         post_trade_price = self.amm.instantaneous_x_price()
