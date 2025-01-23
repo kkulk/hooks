@@ -13,7 +13,7 @@ gamma = 30
 g = 2
 sigma = 8
 mu = 0
-xi = 3
+xi = 0.1
 
 mdp = AMM_MDP(T, Delta_bar, R0, R1, gamma, sigma, mu, xi, g, INV_SPACE=40, Z_SPACE=40, SWAP_SPACE=40)
 
@@ -24,6 +24,8 @@ P, R = mdp.build_mdp_matrices()
 vi = ValueIteration(P, R, .99, epsilon=1e-6)
 vi.run()
 
+print("REWARD PATHS")
+print(mdp.reward_path(vi.policy))
 # Reshape the results
 value_function = np.array(vi.V).reshape((len(mdp.Delta_space), len(mdp.z_space)))
 optimal_policy = np.array(vi.policy).reshape((len(mdp.Delta_space), len(mdp.z_space)))
@@ -61,7 +63,7 @@ plt.xlabel('Bps mispricing, $z$', fontsize=16)
 plt.ylabel('Inventory, $I$', fontsize=16)
 plt.title('Value function', fontsize=18)
 plt.grid(True)
-plt.savefig('../figures/value-function.png', bbox_inches='tight', dpi=500)
+plt.savefig('../figures/value-function-xi-pt3.png', bbox_inches='tight', dpi=500)
 
 
 # Plot Optimal Policy
@@ -75,4 +77,4 @@ plt.xlabel('Bps mispricing, $z$', fontsize=16)
 plt.ylabel('Inventory, $I$', fontsize=16)
 plt.title('Optimal policy', fontsize=18)
 plt.grid(True)
-plt.savefig('../figures/optimal-policy.png', bbox_inches='tight', dpi=500)
+plt.savefig('../figures/optimal-policy-xi-pt3.png', bbox_inches='tight', dpi=500)
