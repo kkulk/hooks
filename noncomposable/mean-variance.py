@@ -100,8 +100,8 @@ surf3 = plot_3d_surface(ax3, alpha_mesh, k_mesh, optimal_delta_superlinear, 'Sup
 ax4 = fig.add_subplot(144, projection='3d')
 surf4 = plot_3d_surface(ax4, alpha_mesh, k_mesh, optimal_delta_constant, 'Constant variance')
 
-plt.tight_layout()
-plt.savefig('../figures/separate_3d_surfaces_delta.png', dpi=300)
+
+plt.savefig('../figures/separate_3d_surfaces_delta.png', dpi=300, bbox_inches='tight', pad_inches=0.1)
 
 # Plot linear, quadratic, and superlinear surfaces together
 latexify(fig_width=18, fig_height=8)
