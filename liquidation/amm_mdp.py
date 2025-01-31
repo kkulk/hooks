@@ -31,7 +31,7 @@ class AMM_MDP:
 
         # discretize state and action spaces
         self.Delta_space = np.linspace(0, Delta_bar, self.INV_SPACE)  # inventory space
-        self.z_space = np.linspace(-1.25 * gamma, 1.25 * gamma, self.Z_SPACE)  # mispricing space
+        self.z_space = np.linspace(-1.25 * gamma/10000, 1.25 * gamma/10000, self.Z_SPACE)  # mispricing space
         self.actions = np.linspace(0, Delta_bar / 10, self.SWAP_SPACE)  # swap sizes space
 
     # keep track of mispricings for both twamm and liquidation separately
@@ -110,6 +110,7 @@ class AMM_MDP:
 
     def build_mdp_matrices(self):
         external_price = self.R1/self.R0
+
         n_states = len(self.Delta_space) * len(self.z_space)
         n_actions = len(self.actions)
         

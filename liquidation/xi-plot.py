@@ -15,13 +15,13 @@ def run_simulation(xi_value, mdp, T, discount_factor=0.99):
     policy = np.array(vi.policy)
     return mdp.simulate(policy,num_simulations=100 )
 
-xi_values = [0, 3,10]
+xi_values = [0, 3, 10]
 T = 200
 Delta_bar = 1000
 R0 = 1e5
 R1 = 1e5 * 5000
 gamma = 30
-sigma = 5
+sigma = 2
 g = 2
 xi = 0
 mu = 0
@@ -45,7 +45,7 @@ with open('amm_mdp_results.pkl', 'wb') as f:
     pickle.dump(results, f)
 
 # Plot results
-latexify(fig_width=8, fig_height=5)
+#latexify(fig_width=8, fig_height=5)
 plt.figure()
 for xi, inventory in results.items():
     plt.plot(inventory, label=f'$\\xi$ = {xi}', linewidth=3)
@@ -55,4 +55,5 @@ plt.ylabel('Inventory, $I$', fontsize=16)
 plt.title('Inventory over time for different $\\xi$ values', fontsize=18)
 plt.legend(fontsize=14)
 plt.grid(True)
+plt.show()
 plt.savefig("../figures/xi-plot.png", bbox_inches="tight", dpi=500)
