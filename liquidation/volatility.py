@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import time
 from mdptoolbox.mdp import ValueIteration
 from amm_mdp import AMM_MDP
+from latexify import latexify
 
 def run_volatility_simulation(sigma, mdp_params):
     """
@@ -63,7 +64,7 @@ if __name__ == "__main__":
         'mu': mu, 'xi': xi, 'INV_SPACE': INV_SPACE, 'Z_SPACE': Z_SPACE, 'SWAP_SPACE': SWAP_SPACE
     }
 
-    volatilities = np.logspace(0, 1.8, 5)  # Logarithmically spaced volatilities (10^0 to 10^1.5), remember we're in bps space
+    volatilities = np.linspace(3, 30, 6)  
 
     start_time = time.time()
     results = sequential_volatility_analysis(volatilities, mdp_params)
@@ -72,15 +73,18 @@ if __name__ == "__main__":
     # print(f"Total computation time: {end_time - start_time:.2f} seconds")
 
     sigmas, avg_values = zip(*results)
-
-    plt.figure(figsize=(12, 8))
-    plt.plot(sigmas, avg_values, marker='o')
-    plt.xscale('log')
-    plt.xlabel('Volatility (σ)')
-    plt.ylabel('Average Value')
-    plt.title('Average Value vs Volatility')
+    latexify(fig_width=8, fig_height=5)
+    plt.figure()
+    plt.plot(sigmas, avg_values, marker='o', linewidth=3)
+    #plt.xscale()
+    xticks = plt.gca().get_xticks()
+    plt.gca().set_xticklabels([f'{x:.0f}' for x in xticks])
+    plt.xlabel('Volatility, $\\sigma$, bps', fontsize=14)
+    plt.ylabel('Average value over TWAMM', fontsize=14)
+    plt.title('Average value over TWAMM vs. volatility', fontsize
+              =16)
     plt.grid(True)
-    plt.show()
+    plt.savefig('../figures/volatility.png', bbox_inches='tight', dpi=500)
 
     for sigma, avg_value in results:
         print(f"Volatility: {sigma:.6f}, Average Value: {avg_value:.6f}")
